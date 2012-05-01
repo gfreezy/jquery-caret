@@ -1,17 +1,20 @@
 // Set caret position easily in jQuery
 // Written by and Copyright of Luke Morton, 2011
+// Updated by gfreezy, 2012
 // Licensed under MIT
 (function ($) {
     // Behind the scenes method deals with browser
     // idiosyncrasies and such
     $.caretTo = function (el, index) {
-        if (el.createTextRange) { 
-            var range = el.createTextRange(); 
-            range.move("character", index); 
-            range.select(); 
-        } else if (el.selectionStart != null) { 
+        if (el.setSelectionRange) { 
             el.focus(); 
             el.setSelectionRange(index, index); 
+        } else if (el.createTextRange) { 
+            var range = el.createTextRange(); 
+            range.collapse(true);
+            range.moveEnd("character", index); 
+            range.moveStart("character", index); 
+            range.select(); 
         }
     };
     
@@ -20,7 +23,9 @@
     
     // TODO: Get working with Opera
     $.caretPos = function (el) {
-        if ("selection" in document) {
+        if (el.selectionStart) {
+            return el.selectionStart;
+        } else if (document.selection) {
             var range = el.createTextRange();
             try {
                 range.setEndPoint("EndToStart", document.selection.createRange());
@@ -30,8 +35,6 @@
                 return 0;
             }
             return range.text.length;
-        } else if (el.selectionStart != null) {
-            return el.selectionStart;
         }
     };
 
